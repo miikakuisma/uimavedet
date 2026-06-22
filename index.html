@@ -25,7 +25,20 @@
       <button data-city="Helsinki" aria-pressed="false">Helsinki</button>
       <button data-city="Espoo" aria-pressed="false">Espoo</button>
       <button data-city="Vantaa" aria-pressed="false">Vantaa</button>
+      <button class="seg-search" id="searchBtn" type="button" aria-label="Hae rantaa" aria-expanded="false">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>
+    <div class="searchbar" id="searchbar" hidden>
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="searchInput" type="search" inputmode="search" autocomplete="off" placeholder="Hae rantaa…" aria-label="Hae rantaa">
+      <button class="search-clear" id="searchClear" type="button" aria-label="Tyhjennä ja sulje haku">✕</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="subbar" id="subbar" hidden>
     <label class="toggle">
       <input type="checkbox" id="hideAlgae">
       <span class="switch" aria-hidden="true"></span>
@@ -33,9 +46,6 @@
       <span class="count" id="count"></span>
     </label>
   </div>
-</nav>
-
-<div class="wrap">
   <main id="list" aria-live="polite"></main>
 
   <footer id="footer" hidden>

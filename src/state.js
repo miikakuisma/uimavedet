@@ -1,7 +1,7 @@
 // Sovelluksen muuttuva tila ja suosikkien talletus.
 import { FAV_KEY } from "./config.js";
 
-export const state = {beaches:[], city:"all", hideAlgae:false};
+export const state = {beaches:[], city:"all", hideAlgae:false, search:""};
 
 let favs = new Set();
 try { favs = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")); } catch (e) {}

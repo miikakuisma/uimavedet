@@ -1,34 +1,50 @@
 // Listan piirto, sticky-varjo ja kortteihin liittyvät tapahtumakuuntelijat.
 import { state, isFav, toggleFavorite } from "./state.js";
-import { visible, compare } from "./beaches.js";
+import { visible, compare, compareBase, passesAlgae, matchesQuery } from "./beaches.js";
 import { cardHTML } from "./card.js";
 import { openSheet } from "./sheet.js";
+import { escapeHTML } from "./format.js";
 
 // Jaetut DOM-viitteet (myös api.js käyttää näitä tilanäkymiin).
 export const $list = document.getElementById("list");
 export const $updated = document.getElementById("updated");
 export const $controls = document.getElementById("controls");
+export const $subbar = document.getElementById("subbar");
 export const $footer = document.getElementById("footer");
 const $count = document.getElementById("count");
 
 export function render(){
-  const shown = state.beaches.filter(visible).sort(compare);
+  const q = state.search.trim().toLowerCase();
+  const searching = q.length > 0;
+
+  // Haussa: tasalista, ei suosikkiosiota, kaupunkisuodatin ohitetaan, mutta
+  // leväsuodatin jää voimaan. Muuten normaali näkymä.
+  const shown = searching
+    ? state.beaches.filter(b => passesAlgae(b) && matchesQuery(b, q)).sort(compareBase)
+    : state.beaches.filter(visible).sort(compare);
+
   $count.textContent = shown.length + (shown.length === 1 ? " ranta" : " rantaa");
 
   if(shown.length === 0){
-    $list.innerHTML = `<div class="state"><h2>Ei näytettäviä rantoja</h2><p>Kokeile vaihtaa kaupunkia tai näyttää myös leväiset rannat.</p></div>`;
+    $list.innerHTML = searching
+      ? `<div class="state"><h2>Ei hakutuloksia</h2><p>Haulla ”${escapeHTML(state.search.trim())}” ei löytynyt rantoja. Kokeile toista hakusanaa.</p></div>`
+      : `<div class="state"><h2>Ei näytettäviä rantoja</h2><p>Kokeile vaihtaa kaupunkia tai näyttää myös leväiset rannat.</p></div>`;
     return;
   }
 
-  const favList = shown.filter(isFav);
-  const rest = shown.filter(b => !isFav(b));
   let html = "", i = 0;
-  if(favList.length){
-    html += `<div class="sec"><span class="star">★</span> Suosikit</div>`;
-    favList.forEach(b => { html += cardHTML(b, i++); });
-    html += `<div class="sec">Kaikki rannat</div>`;
+  if(!searching){
+    const favList = shown.filter(isFav);
+    const rest = shown.filter(b => !isFav(b));
+    if(favList.length){
+      html += `<div class="sec"><span class="star">★</span> Suosikit</div>`;
+      favList.forEach(b => { html += cardHTML(b, i++); });
+      html += `<div class="sec">Kaikki rannat</div>`;
+    }
+    rest.forEach(b => { html += cardHTML(b, i++); });
+  } else {
+    shown.forEach(b => { html += cardHTML(b, i++); });
   }
-  rest.forEach(b => { html += cardHTML(b, i++); });
   $list.innerHTML = html;
 }
 

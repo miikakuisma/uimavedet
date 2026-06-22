@@ -2,7 +2,7 @@
 import { WORKER_URL } from "./config.js";
 import { state } from "./state.js";
 import { escapeHTML } from "./format.js";
-import { render, onScroll, $list, $updated, $controls, $footer } from "./render.js";
+import { render, onScroll, $list, $updated, $controls, $subbar, $footer } from "./render.js";
 
 export function showLoading(){
   let sk = "";
@@ -12,7 +12,7 @@ export function showLoading(){
 }
 
 export function showError(){
-  $list.className = ""; $controls.hidden = true; $footer.hidden = true;
+  $list.className = ""; $controls.hidden = true; $subbar.hidden = true; $footer.hidden = true;
   $list.innerHTML = `<div class="state">
     <svg class="wave" viewBox="0 0 128 14" fill="none"><path d="M1 7c10.5-8 21-8 31.5 0S53.5 15 64 7s21-8 31.5 0 21 8 31.5 0" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
     <h2>Tietojen haku ei onnistunut</h2><p>Yhteys uimavesipalveluun katkesi. Tarkista verkkoyhteys ja yritä uudelleen.</p>
@@ -21,7 +21,7 @@ export function showError(){
 }
 
 export function showOffSeason(updatedText){
-  $list.className = ""; $controls.hidden = true;
+  $list.className = ""; $controls.hidden = true; $subbar.hidden = true;
   $list.innerHTML = `<div class="state">
     <svg class="wave" viewBox="0 0 128 14" fill="none"><path d="M1 7c10.5-8 21-8 31.5 0S53.5 15 64 7s21-8 31.5 0 21 8 31.5 0" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
     <h2>Uimakausi ei ole käynnissä</h2><p>Reaaliaikaisia uimavesihavaintoja näytetään kesäkaudella. Pulahdetaan taas silloin!</p></div>`;
@@ -39,7 +39,7 @@ export async function load(){
     if(beaches.length === 0){ showOffSeason(data.updatedText); return; }
     state.beaches = beaches;
     $list.className = "";
-    $controls.hidden = false; $footer.hidden = false;
+    $controls.hidden = false; $subbar.hidden = false; $footer.hidden = false;
     $updated.innerHTML = `<span class="dot-live"></span>Päivitetty ${escapeHTML(data.updatedText || "")}`;
     render(); onScroll();
   }catch(err){

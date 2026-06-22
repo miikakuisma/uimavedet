@@ -54,7 +54,7 @@
     /* full-bleed: negative margins cancel the body's 18px side padding so the
        bar spans the viewport edge-to-edge (no gutter seam on wide screens) */
     margin:22px -18px 0;
-    padding:12px 0 16px;
+    padding:12px 0 12px;
     background:transparent;
     transition:background .2s, box-shadow .2s;
   }
@@ -83,7 +83,28 @@
     min-height:40px;letter-spacing:.01em;
   }
   .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper-2)}
-  .toggle{display:flex;align-items:center;gap:11px;margin-top:11px;padding:2px 4px;cursor:pointer;user-select:none}
+  /* hakupainike: kapea ikonipainike kaupunkien jälkeen (ei flex:1) */
+  .seg .seg-search{flex:none;width:42px;padding:9px 0;display:grid;place-items:center;color:var(--ink-soft)}
+  .seg .seg-search svg{width:18px;height:18px}
+  .seg .seg-search:hover{color:var(--ink)}
+
+  /* .seg ja .searchbar ovat display:flex, joten paljas [hidden] ei piilota
+     niitä – tarvitaan eksplisiittinen sääntö kun vaihdetaan niiden välillä. */
+  .seg[hidden],.searchbar[hidden]{display:none}
+
+  /* hakukenttä: sama pilleri kuin .seg, vaihtuu sen tilalle haun ollessa auki */
+  .searchbar{display:flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);border-radius:13px;padding:4px 6px 4px 13px;box-shadow:var(--shadow)}
+  .searchbar > svg{width:17px;height:17px;color:var(--ink-soft);flex:none}
+  .searchbar input{flex:1;min-width:0;appearance:none;border:0;background:transparent;font-family:inherit;font-size:15px;font-weight:500;color:var(--ink);min-height:40px;padding:0}
+  .searchbar input::placeholder{color:var(--ink-soft);opacity:1}
+  .searchbar input:focus{outline:none}
+  .searchbar input::-webkit-search-cancel-button{display:none}
+  .search-clear{flex:none;appearance:none;border:0;background:transparent;cursor:pointer;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:17px;line-height:1;color:var(--ink-soft);transition:background .15s,color .15s}
+  .search-clear:hover{background:var(--paper);color:var(--ink)}
+
+  /* leväsuodatin + lukumäärä: erillinen, ei-sticky rivi listan yläpuolella */
+  .subbar{margin:0 0 13px}
+  .toggle{display:flex;align-items:center;gap:11px;padding:2px 4px;cursor:pointer;user-select:none}
   .toggle input{position:absolute;opacity:0;pointer-events:none}
   .switch{position:relative;width:42px;height:24px;border-radius:99px;background:var(--line);transition:background .2s;flex:none}
   .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--paper-2);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
