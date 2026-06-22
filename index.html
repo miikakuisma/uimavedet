@@ -62,10 +62,16 @@
   /* ---------- Controls ---------- */
   .controls{
     position:sticky;top:0;z-index:20;
-    margin-top:22px;padding:12px 0 16px;
+    /* full-bleed: negative margins cancel the body's 18px side padding so the
+       bar spans the viewport edge-to-edge (no gutter seam on wide screens) */
+    margin:22px -18px 0;
+    padding:12px 0 16px;
     background:transparent;
     transition:background .2s, box-shadow .2s;
   }
+  /* keep the buttons/toggle aligned to the same column as the cards.
+     maxw + 36 accounts for the 18px inset re-added here on each side. */
+  .controls-inner{max-width:calc(var(--maxw) + 36px);margin:0 auto;padding:0 18px}
   /* At rest the bar is transparent so it never reads as a flat box over the
      textured page. Once stuck it gets a solid fill (cards clip crisply under
      it) plus a soft shadow for separation. */
@@ -229,8 +235,10 @@
     <h1>Uimavedet</h1>
     <p class="updated" id="updated">&nbsp;</p>
   </header>
+</div>
 
-  <nav class="controls" id="controls" hidden>
+<nav class="controls" id="controls" hidden>
+  <div class="controls-inner">
     <div class="seg" id="cities" role="group" aria-label="Suodata kaupungin mukaan">
       <button data-city="all" aria-pressed="true">Kaikki</button>
       <button data-city="Helsinki" aria-pressed="false">Helsinki</button>
@@ -243,8 +251,10 @@
       <span>Piilota leväiset rannat</span>
       <span class="count" id="count"></span>
     </label>
-  </nav>
+  </div>
+</nav>
 
+<div class="wrap">
   <main id="list" aria-live="polite"></main>
 
   <footer id="footer" hidden>
