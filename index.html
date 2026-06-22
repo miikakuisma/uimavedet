@@ -62,17 +62,17 @@
   /* ---------- Controls ---------- */
   .controls{
     position:sticky;top:0;z-index:20;
-    margin-top:22px;padding:12px 0;
+    margin-top:22px;padding:12px 0 16px;
+    background:transparent;
+    transition:background .2s, box-shadow .2s;
+  }
+  /* At rest the bar is transparent so it never reads as a flat box over the
+     textured page. Once stuck it gets a solid fill (cards clip crisply under
+     it) plus a soft shadow for separation. */
+  .controls.stuck{
     background:var(--paper);
+    box-shadow:0 7px 14px -9px rgba(18,46,54,.5);
   }
-  /* soft fade below the bar so cards dissolve as they scroll under it,
-     instead of ghosting through the bar itself. Only while stuck. */
-  .controls::after{
-    content:"";position:absolute;left:0;right:0;top:100%;height:20px;
-    background:linear-gradient(var(--paper),rgba(241,232,214,0));
-    opacity:0;transition:opacity .2s;pointer-events:none;
-  }
-  .controls.stuck::after{opacity:1}
   .seg{display:flex;gap:4px;background:var(--paper-2);border:1px solid var(--line);border-radius:13px;padding:4px;box-shadow:var(--shadow)}
   .seg button{
     flex:1;appearance:none;border:0;background:transparent;cursor:pointer;
