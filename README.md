@@ -1,68 +1,140 @@
-# Helsingin uimarantojen tilanne
+# Helsingin seudun uimavedet
 
-Helsingin uimarantojen tilanne suoraan [TRMNL](https://trmnl.com/) e-ink -näytölle.
+Helsingin, Espoon ja Vantaan uimarantojen ja uimapaikkojen **veden lämpötila** ja
+**sinilevätilanne** – mobiilisivuna selaimessa sekä [TRMNL](https://trmnl.com/)
+e-ink -näytöllä.
+
+Data tulee Helsingin kaupungin **Palvelukartta-API**:sta (sama lähde jota
+[ulkoliikunta.fi](https://ulkoliikunta.fi/) käyttää). Puter Worker hakee ja
+muuntaa datan, ja sekä mobiilisivu että TRMNL-plugin näyttävät sen.
 
 ## Miten se toimii
 
 ```
-TRMNL-näyttö  →  Puter Worker (/api/menu)  →  Aromi API (aromi.hel.fi)
-                        ↓
-                  JSON-vastaus: { date, meals }
-                        ↓
-                  TRMNL plugin.html renderöi
-                  ruokalistan e-ink -näytölle
+Mobiilisivu (index.html) ──┐
+                           ├──►  Puter Worker  ──►  Palvelukartta-API
+TRMNL plugin.html ─────────┘     GET /api/beaches    (api.hel.fi, palvelut 730 + 731)
+                                 haku + muunnos JSON:ksi
 ```
 
-1. **Puter Worker** (`worker.js`) hakee päivän ruokalistan Aromi API:sta ja muuntaa sen yksinkertaiseen JSON-muotoon
-2. **TRMNL plugin** (`TRMNL plugin.html`) renderöi datan Jinja2-templatella e-ink -näytölle sopivaan muotoon
+1. **Puter Worker** (`worker.js`) hakee uimarantojen havainnot Palvelukartasta,
+   poimii lämpötilan ja sinilevätilanteen, suodattaa vanhentuneet lukemat ja
+   palauttaa siistin JSON:n endpointista `GET /api/beaches`.
+2. **Mobiilisivu** (`index.html`) listaa kaikki rannat: suodatus kaupungin mukaan,
+   suosikit ja järjestys jossa levättömät & lämpimimmät ovat ylinnä.
+3. **TRMNL-plugin** (`TRMNL plugin.html`) näyttää muutaman itse valitun rannan
+   e-ink-näytöllä.
 
 ## Tiedostot
 
 | Tiedosto | Kuvaus |
 |---|---|
-| `worker.js` | Puter Worker -backend, joka toimii API-proxynä Aromin ja TRMNL:n välillä |
-| `TRMNL plugin.html` | Jinja2-template, joka renderöi ruokalistan TRMNL-näytölle |
+| `worker.js` | Puter Worker -backend, API-proxy ja muunnin Palvelukartan ja näyttöjen välillä |
+| `index.html` | Mobiilioptimoitu verkkosivu (vanilla JS, ei riippuvuuksia) |
+| `TRMNL plugin.html` | Liquid-template, joka renderöi valitut rannat TRMNL-näytölle |
+| `docs/superpowers/specs/` | Suunnitteludokumentti |
 
-## Asennus
+## Datalähde
 
-### 1. Worker Puter.com-alustalle
+```
+GET https://api.hel.fi/servicemap/v2/unit/
+      ?service=730,731              # 730 = uimapaikat, 731 = uimarannat
+      &municipality=helsinki,espoo,vantaa
+      &include=observations         # reaaliaikaiset havainnot
+      &only=name,municipality,observations
+```
 
-1. Luo tili [Puter.com](https://puter.com/)-palveluun
-2. Luo uusi Worker ja kopioi `worker.js` sisältö sinne
-3. Worker tarjoaa endpointin `GET /api/menu`, joka palauttaa päivän ruokalistan JSON-muodossa
+Worker lukee jokaiselta rannalta kolme havaintoa:
 
-### 2. TRMNL Plugin
+| Havainto | Merkitys |
+|---|---|
+| `measured_swimming_water_temperature` | Tarkka anturilämpötila °C (ensisijainen) |
+| `swimming_water_temperature` | Lämpötilaluokka esim. "15-17°C" (varalla, mm. Espoo/Vantaa) |
+| `swimming_water_cyanobacteria` | Sinilevätaso 0–3 |
 
-1. Luo [TRMNL Developer](https://usetrmnl.com/plugin/new)-sivulla uusi Private Plugin
-2. Strategiaksi valitse **Webhook/Polling** ja syötä Puter Workerin URL (`https://<sinun-worker>.puter.site/api/menu`)
-3. Kopioi `TRMNL plugin.html` sisältö pluginin **Markup**-kenttään
+Yli 14 vrk vanhat havainnot ohitetaan, jolloin uimakauden ulkopuolella lista jää
+tyhjäksi.
+
+### Sinileväasteikko
+
+| Arvo | `algae` | Selite |
+|---|---|---|
+| 0 | `none` | Ei havaittua sinilevää |
+| 1 | `little` | Vähän sinilevää |
+| 2 | `lots` | Runsaasti sinilevää |
+| 3 | `much` | Erittäin runsaasti sinilevää |
+| – | `unknown` | Ei havaintoa |
 
 ## API-vastaus
 
-`GET /api/menu` palauttaa:
+`GET /api/beaches` palauttaa rannat järjestyksessä levättömät ensin, kunkin
+ryhmän sisällä lämpimin ensin:
 
 ```json
 {
-  "date": "2026-02-26T00:00:00",
-  "meals": [
+  "updated": "2026-06-22T08:31:12.412Z",
+  "updatedText": "22.6. klo 11:31",
+  "beaches": [
     {
-      "name": "Aamupala",
-      "foods": "Puuroa, leipää, hedelmää"
-    },
-    {
-      "name": "Lounas",
-      "foods": "Lihapullia, perunasosetta, salaattia"
-    },
-    {
-      "name": "Välipala",
-      "foods": "Jogurttia ja marjoja"
+      "name": "Rastilan uimaranta",
+      "municipality": "Helsinki",
+      "temp": "20.9°C",
+      "tempC": 20.9,
+      "tempExact": true,
+      "tempTime": "2026-06-22T08:58:10+03:00",
+      "algae": "none",
+      "algaeRank": 0,
+      "algaeLabel": "Ei havaittua sinilevää",
+      "algaeTime": "2026-06-21T09:55:44+03:00"
     }
   ]
 }
 ```
 
+- `temp` – näyttövalmis merkkijono (`"20.9°C"` tai luokka `"19-21°C"`), tai `null`.
+- `tempC` – numeerinen lajitteluarvo (mitattu lukema tai luokan keskikohta).
+- `tempExact` – `true` = tarkka anturilukema, `false` = luokka-arvio.
+- `algaeRank` – `0` levätön … `4` runsain; käytetään järjestämiseen.
+
+## Asennus
+
+### 1. Worker Puter.com-alustalle
+
+1. Luo tili [Puter.com](https://puter.com/)-palveluun ja uusi Worker.
+2. Kopioi `worker.js` sisältö Workeriin ja julkaise.
+3. Worker tarjoaa endpointin `GET /api/beaches`. (Esimerkki tässä projektissa:
+   `https://meri.puter.work/api/beaches`.)
+
+### 2. Mobiilisivu
+
+1. Avaa `index.html` ja aseta tiedoston alussa oleva `WORKER_URL` osoittamaan
+   omaan Workeriisi.
+2. Julkaise tiedosto Puterin staattisena sivustona (tai mihin tahansa staattiseen
+   hostiin). Suosikit tallentuvat selaimen `localStorage`-muistiin.
+
+### 3. TRMNL Plugin
+
+1. Luo [TRMNL Developer](https://usetrmnl.com/plugin/new) -sivulla uusi Private
+   Plugin, strategiaksi **Webhook/Polling**, ja syötä Workerin URL
+   (`https://<oma-worker>.puter.work/api/beaches`).
+2. Kopioi `TRMNL plugin.html` sisältö pluginin **Markup**-kenttään.
+3. Valitse näytettävät rannat muokkaamalla templaten alussa olevaa `targets`-listaa
+   (rantojen nimet täsmälleen kuten datassa, haluamassasi järjestyksessä):
+   ```liquid
+   {% assign targets = "Seurasaaren uimala,Munkkiniemen uimaranta,Lauttasaaren uimaranta" | split: "," %}
+   ```
+
+## Huomioita
+
+- Datassa ovat mukana vain kaupunkien valvomat uimarannat ja uimapaikat. Esim.
+  talviuintipaikat tai osa pienemmistä paikoista eivät kuulu seurantaan.
+- Joidenkin paikkojen automaattinen lämpötila-anturi voi olla epätarkka (kaupunki
+  varoittaa tästä paikan `notice`-kentässä); worker näyttää silti tarkan
+  anturilukeman kun se on saatavilla.
+- **Tarkista aina tilanne paikan päältä ennen uintia.**
+
 ## Teknologiat
 
-- [TRMNL](https://trmnl.com/) - e-ink -näyttöalusta
-- [Puter.com](https://puter.com/) - pilvialusta serverless workereille
-- [Aromi](https://aromi.hel.fi/) - Helsingin kaupungin ruokalistajärjestelmä
+- [Puter.com](https://puter.com/) – pilvialusta serverless workereille ja staattiselle hostaukselle
+- [TRMNL](https://trmnl.com/) – e-ink -näyttöalusta
+- [Palvelukartta / Service Map API](https://api.hel.fi/servicemap/v2/) – Helsingin seudun avoin palvelu- ja havaintodata

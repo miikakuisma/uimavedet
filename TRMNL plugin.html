@@ -1,54 +1,48 @@
 <style>
-  .meri-wrap { padding: 6px 18px 0; }
-  .meri-legend { font-size: 13px; margin-bottom: 6px; }
-  .meri-grid { column-count: 2; column-gap: 34px; }
-  .meri-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 3px 0;
-    border-bottom: 1px dotted #000;
-    break-inside: avoid;
-  }
-  .meri-name {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 17px;
-  }
-  .meri-city { font-size: 11px; padding-left: 4px; }
-  .meri-right { white-space: nowrap; display: flex; align-items: baseline; gap: 6px; }
-  .meri-warn { font-weight: 700; letter-spacing: -1px; }
-  .meri-temp { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .meri-empty { font-size: 30px; text-align: center; padding-top: 90px; }
+  .meri{padding:24px 46px 0}
+  .meri-row{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:3px solid #000}
+  .meri-row:last-child{border-bottom:0}
+  .meri-left{min-width:0;padding-right:24px}
+  .meri-name{font-size:36px;font-weight:700;line-height:1.04;letter-spacing:-.5px}
+  .meri-algae{font-size:23px;font-weight:600;margin-top:10px}
+  .meri-algae .ic{font-size:18px;vertical-align:2px;margin-right:7px}
+  .meri-temp{font-size:66px;font-weight:700;line-height:1;white-space:nowrap}
+  .meri-temp .u{font-size:30px;font-weight:600}
+  .meri-dim{opacity:.55}
 </style>
 
-<div class="layout">
-  {% if beaches == empty %}
-    <div class="meri-empty">
-      <p>Ei uintitietoja saatavilla</p>
-    </div>
-  {% else %}
-    <div class="meri-wrap">
-      <div class="meri-legend">Veden lämpötila &middot; lämpimin ensin &middot; ⚠ = sinilevää</div>
-      <div class="meri-grid">
-        {% for beach in beaches %}
-          <div class="meri-row">
-            <span class="meri-name">{{ beach.name | remove: " uimaranta" | remove: " uimapaikka" }}{% unless beach.municipality == "Helsinki" %}<span class="meri-city">{{ beach.municipality }}</span>{% endunless %}</span>
-            <span class="meri-right">
-              {% if beach.algae == "little" %}<span class="meri-warn">⚠</span>{% elsif beach.algae == "lots" %}<span class="meri-warn">⚠⚠</span>{% elsif beach.algae == "much" %}<span class="meri-warn">⚠⚠⚠</span>{% endif %}
-              <span class="meri-temp">{% if beach.temp %}{{ beach.temp }}{% else %}&ndash;{% endif %}</span>
-            </span>
+<div class="meri">
+  {% assign targets = "Seurasaaren uimala,Munkkiniemen uimaranta,Lauttasaaren uimaranta" | split: "," %}
+  {% for name in targets %}
+    {% assign b = beaches | where: "name", name | first %}
+    <div class="meri-row">
+      <div class="meri-left">
+        <div class="meri-name">{{ name }}</div>
+        {% if b %}
+          <div class="meri-algae">
+            {% case b.algae %}
+              {% when 'none' %}<span class="ic">●</span>Levätön
+              {% when 'little' %}<span class="ic">▲</span>Vähän levää
+              {% when 'lots' %}<span class="ic">▲</span>Runsaasti levää
+              {% when 'much' %}<span class="ic">▲</span>Erittäin runsaasti levää
+              {% else %}<span class="ic">○</span>Ei levätietoa
+            {% endcase %}
           </div>
-        {% endfor %}
+        {% else %}
+          <div class="meri-algae meri-dim"><span class="ic">○</span>Ei havaintoa</div>
+        {% endif %}
       </div>
+      {% if b and b.temp %}
+        <div class="meri-temp">{{ b.temp | remove: "°C" }}<span class="u">°C</span></div>
+      {% else %}
+        <div class="meri-temp meri-dim">&ndash;</div>
+      {% endif %}
     </div>
-  {% endif %}
+  {% endfor %}
 </div>
 
 <div class="title_bar">
   <img class="image" src="https://trmnl.com/images/plugins/trmnl--render.svg">
-  <span class="title">Uimarannat</span>
+  <span class="title">Uimavedet</span>
   <span class="instance">Päivitetty {{ updatedText }}</span>
 </div>
