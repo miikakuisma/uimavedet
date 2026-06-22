@@ -151,6 +151,62 @@
   footer{max-width:var(--maxw);margin:6px auto 30px;padding:18px 2px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft);line-height:1.6}
   footer a{color:var(--sea);text-decoration:none;font-weight:600}
   footer a:hover{text-decoration:underline}
+
+  /* ---------- Tappable card ---------- */
+  .beach{cursor:pointer}
+  .beach:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+  /* the fav star keeps its own cursor/behaviour */
+  .fav{cursor:pointer}
+
+  /* ---------- Detail sheet ---------- */
+  .sheet-backdrop{
+    position:fixed;inset:0;z-index:40;background:rgba(18,46,54,.42);
+    opacity:0;transition:opacity .25s;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  }
+  .sheet-backdrop.show{opacity:1}
+  .sheet{
+    position:fixed;left:50%;bottom:0;z-index:50;
+    width:100%;max-width:var(--maxw);
+    transform:translate(-50%,100%);
+    transition:transform .32s cubic-bezier(.2,.7,.2,1);
+    background:var(--paper-2);border:1px solid var(--line);border-bottom:0;
+    border-radius:20px 20px 0 0;
+    box-shadow:0 -8px 44px -14px rgba(18,46,54,.55);
+    padding:8px 18px calc(20px + env(safe-area-inset-bottom));
+    max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .sheet.show{transform:translate(-50%,0)}
+  @media (prefers-reduced-motion:reduce){.sheet,.sheet-backdrop{transition:none}}
+  .sheet-grab{width:38px;height:4px;border-radius:99px;background:var(--line);margin:4px auto 10px}
+  .sheet-close{
+    position:absolute;top:12px;right:12px;appearance:none;border:0;background:transparent;
+    font-size:19px;line-height:1;color:var(--ink-soft);cursor:pointer;
+    width:36px;height:36px;border-radius:50%;display:grid;place-items:center;transition:background .15s,color .15s;
+  }
+  .sheet-close:hover{background:var(--paper);color:var(--ink)}
+  .sheet-head{padding-right:40px}
+  .sheet-name{font-family:"Fraunces",serif;font-weight:600;font-size:25px;line-height:1.08;letter-spacing:-.01em}
+  .sheet-city{font-size:13px;color:var(--ink-soft);font-weight:500;margin-top:3px}
+  .sheet-map{
+    margin:14px 0;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    aspect-ratio:16/10;background:var(--paper);
+  }
+  .sheet-map iframe{display:block;width:100%;height:100%;border:0}
+  .sheet-status{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;margin-bottom:13px}
+  .sheet-temp{font-family:"Fraunces",serif;font-weight:500;font-size:22px;font-variant-numeric:tabular-nums;line-height:1}
+  .sheet-temp .unit{font-size:14px;color:var(--ink-soft)}
+  .sheet-temp .approx{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);font-family:"Hanken Grotesk",sans-serif;font-weight:600;margin-left:6px}
+  .sheet-algae{--accent:var(--unknown);display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;color:var(--accent)}
+  .sheet-algae .d{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+  .sheet-desc{font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-line;margin-bottom:18px}
+  .sheet-route{
+    display:block;text-align:center;text-decoration:none;
+    background:var(--sea);color:var(--paper-2);
+    font-family:inherit;font-weight:700;font-size:15px;letter-spacing:.01em;
+    padding:14px;border-radius:13px;box-shadow:var(--shadow);transition:background .15s,transform .1s;
+  }
+  .sheet-route:hover{background:#0f5e6b}
+  .sheet-route:active{transform:scale(.985)}
 </style>
 </head>
 <body>
@@ -183,6 +239,20 @@
     havainnot uimarantakaudelta. Tarkista aina tilanne paikan päältä ennen uintia.
   </footer>
 </div>
+
+<div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetName" hidden>
+  <div class="sheet-grab" aria-hidden="true"></div>
+  <button class="sheet-close" id="sheetClose" type="button" aria-label="Sulje">✕</button>
+  <header class="sheet-head">
+    <h2 class="sheet-name" id="sheetName"></h2>
+    <p class="sheet-city" id="sheetCity"></p>
+  </header>
+  <div class="sheet-map" id="sheetMap" hidden></div>
+  <div class="sheet-status" id="sheetStatus"></div>
+  <p class="sheet-desc" id="sheetDesc" hidden></p>
+  <a class="sheet-route" id="sheetRoute" target="_blank" rel="noopener" hidden>Avaa reittiopas →</a>
+</section>
 
 <script>
 const WORKER_URL = "https://meri.puter.work/api/beaches";
@@ -238,7 +308,7 @@ function cardHTML(b, idx){
   if(!t){ tempHTML = "&ndash;"; tempClass = "none"; }
   else { tempClass = b.tempExact ? "" : "range"; tempHTML = `<span class="num">${t.val}</span><span class="unit">${t.unit}</span>`; }
   const approx = (t && !b.tempExact) ? `<span class="approx">arvio</span>` : "";
-  return `<article class="beach a-${aKey}" style="--i:${idx}">
+  return `<article class="beach a-${aKey}" style="--i:${idx}" data-name="${escapeAttr(b.name)}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${escapeAttr(b.name)} – näytä sijainti ja reittiopas">
     <button class="fav" data-name="${escapeAttr(b.name)}" aria-pressed="${fav}" aria-label="${fav?"Poista suosikeista":"Lisää suosikiksi"}: ${escapeAttr(b.name)}">${fav?"★":"☆"}</button>
     <div class="bmain">
       <div class="bname" title="${escapeAttr(b.name)}">${escapeHTML(b.name)}</div>
@@ -281,9 +351,105 @@ function toggleFav(name, btn){
 }
 
 $list.addEventListener("click", e => {
-  const btn = e.target.closest(".fav");
-  if(btn) toggleFav(btn.dataset.name, btn);
+  const fav = e.target.closest(".fav");
+  if(fav){ toggleFav(fav.dataset.name, fav); return; }
+  const card = e.target.closest(".beach");
+  if(card && card.dataset.name) openSheet(card.dataset.name, card);
 });
+
+// Keyboard activation for the card itself (role="button"). The fav button
+// fires its own click on Enter/Space, so guard on e.target === card.
+$list.addEventListener("keydown", e => {
+  if(e.key !== "Enter" && e.key !== " ") return;
+  const card = e.target.closest(".beach");
+  if(card && e.target === card){ e.preventDefault(); openSheet(card.dataset.name, card); }
+});
+
+/* ---------- Detail sheet ---------- */
+const $sheet = document.getElementById("sheet");
+const $backdrop = document.getElementById("sheetBackdrop");
+const $sheetName = document.getElementById("sheetName");
+const $sheetCity = document.getElementById("sheetCity");
+const $sheetMap = document.getElementById("sheetMap");
+const $sheetStatus = document.getElementById("sheetStatus");
+const $sheetDesc = document.getElementById("sheetDesc");
+const $sheetRoute = document.getElementById("sheetRoute");
+const $sheetClose = document.getElementById("sheetClose");
+let sheetReturnFocus = null;
+let sheetHideTimer = null;
+
+function reittiopasURL(b){
+  // Digitransit-muoto: /reitti/<lähtö>/<määränpää>, paikka = "Nimi::lat,lon".
+  // POS = "Oma sijainti" → reitti lasketaan käyttäjän paikannuksesta rannalle.
+  return "https://reittiopas.hsl.fi/reitti/POS/" + encodeURIComponent(`${b.name}::${b.lat},${b.lon}`);
+}
+function osmEmbedURL(b){
+  const d = 0.004; // pieni laatikko pisteen ympärille
+  const bbox = [b.lon - d, b.lat - d, b.lon + d, b.lat + d].join(",");
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${b.lat},${b.lon}`;
+}
+
+function openSheet(name, card){
+  const b = state.beaches.find(x => x.name === name);
+  if(!b) return;
+  clearTimeout(sheetHideTimer);
+  sheetReturnFocus = card || document.activeElement;
+
+  $sheetName.textContent = b.name;
+  $sheetCity.textContent = b.municipality || "";
+
+  // Lämpötila + levä (sama logiikka kuin kortissa).
+  const aKey = b.algae || "unknown";
+  const t = splitTemp(b.temp);
+  const tempHTML = t
+    ? `<div class="sheet-temp">${escapeHTML(t.val)}<span class="unit">${escapeHTML(t.unit)}</span>${b.tempExact ? "" : `<span class="approx">arvio</span>`}</div>`
+    : "";
+  const algaeHTML = `<span class="sheet-algae a-${aKey}"><span class="d"></span>${ALGAE_LABEL[aKey] || ALGAE_LABEL.unknown}</span>`;
+  $sheetStatus.innerHTML = tempHTML + algaeHTML;
+
+  // Kuvaus.
+  $sheetDesc.textContent = b.description || "";
+  $sheetDesc.hidden = !b.description;
+
+  // Kartta + reittiopas vain jos koordinaatit ovat tiedossa.
+  if(b.lat != null && b.lon != null){
+    $sheetMap.innerHTML = `<iframe loading="lazy" title="Kartta: ${escapeAttr(b.name)}" src="${osmEmbedURL(b)}"></iframe>`;
+    $sheetMap.hidden = false;
+    $sheetRoute.href = reittiopasURL(b);
+    $sheetRoute.hidden = false;
+  } else {
+    $sheetMap.innerHTML = "";
+    $sheetMap.hidden = true;
+    $sheetRoute.removeAttribute("href");
+    $sheetRoute.hidden = true;
+  }
+
+  $backdrop.hidden = false;
+  $sheet.hidden = false;
+  $sheet.scrollTop = 0;
+  requestAnimationFrame(() => { $backdrop.classList.add("show"); $sheet.classList.add("show"); });
+  document.body.style.overflow = "hidden";
+  $sheetClose.focus();
+  document.addEventListener("keydown", onSheetKey);
+}
+
+function closeSheet(){
+  $backdrop.classList.remove("show");
+  $sheet.classList.remove("show");
+  document.removeEventListener("keydown", onSheetKey);
+  document.body.style.overflow = "";
+  sheetHideTimer = setTimeout(() => {
+    $backdrop.hidden = true;
+    $sheet.hidden = true;
+    $sheetMap.innerHTML = ""; // pysäytä kartan iframe-lataus
+  }, 320);
+  if(sheetReturnFocus && sheetReturnFocus.focus) sheetReturnFocus.focus();
+}
+
+function onSheetKey(e){ if(e.key === "Escape") closeSheet(); }
+
+$sheetClose.addEventListener("click", closeSheet);
+$backdrop.addEventListener("click", closeSheet);
 
 document.getElementById("cities").addEventListener("click", e => {
   const btn = e.target.closest("button"); if(!btn) return;

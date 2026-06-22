@@ -68,6 +68,15 @@ function transformBeach(unit, now) {
   const name = (unit.name && (unit.name.fi || unit.name.en)) || "Uimaranta";
   const municipality = capitalize(unit.municipality);
 
+  // Sijainti karttaa ja reittiopas-linkkiä varten. Service Map antaa GeoJSON
+  // Pointin jossa koordinaatit ovat järjestyksessä [lon, lat].
+  const coords = unit.location && Array.isArray(unit.location.coordinates) ? unit.location.coordinates : null;
+  const lat = coords ? coords[1] : null;
+  const lon = coords ? coords[0] : null;
+
+  // Kuvaus (sisältää usein saapumis-/joukkoliikenneohjeet). Suomeksi, varalla en.
+  const description = (unit.description && (unit.description.fi || unit.description.en)) || null;
+
   // Lämpötila: ensisijaisesti tarkka anturilukema, muuten kategoria-arvio.
   let temp = null;
   let tempC = null;
@@ -104,6 +113,9 @@ function transformBeach(unit, now) {
   return {
     name,
     municipality,
+    lat,
+    lon,
+    description,
     temp,
     tempC,
     tempExact,
@@ -147,7 +159,7 @@ function helsinkiText(now) {
 async function fetchBeaches() {
   const url =
     `${API_URL}?service=${BEACH_SERVICES}&municipality=${MUNICIPALITIES}` +
-    `&include=observations&page_size=400&only=name,municipality,observations&format=json`;
+    `&include=observations&page_size=400&only=name,municipality,location,description,observations&format=json`;
 
   const response = await fetch(url);
 
