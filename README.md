@@ -115,9 +115,13 @@ Workeriisi tiedostossa `src/config.js`.
 2. Kehitys: `npm run dev` (Vite-dev-palvelin + HMR).
 3. Tuotantokäännös: `npm run build` → staattiset tiedostot hakemistoon `dist/`
    (esikatselu paikallisesti: `npm run preview`).
-4. Julkaise `dist/`-hakemiston sisältö Puterin staattisena sivustona (tai mihin
-   tahansa staattiseen hostiin). Suosikit tallentuvat selaimen
-   `localStorage`-muistiin.
+4. Julkaise mobiilisivu. Tämä projekti on **Vercelissä**: Vercel tunnistaa
+   Vite-projektin automaattisesti (build `vite build`, output `dist/`), joten
+   erillistä `vercel.json`-tiedostoa ei tarvita. Frontend ja worker ovat eri
+   hosteissa (Vercel + Puter), mikä toimii koska worker palauttaa
+   `Access-Control-Allow-Origin: *` ja `WORKER_URL` (`src/config.js`) on
+   absoluuttinen osoite Puteriin. Sivun voi julkaista myös mihin tahansa muuhun
+   staattiseen hostiin. Suosikit tallentuvat selaimen `localStorage`-muistiin.
 
 ### 3. TRMNL Plugin
 
@@ -142,6 +146,8 @@ Workeriisi tiedostossa `src/config.js`.
 
 ## Teknologiat
 
-- [Puter.com](https://puter.com/) – pilvialusta serverless workereille ja staattiselle hostaukselle
+- [Vite](https://vitejs.dev/) – mobiilisivun build-työkalu
+- [Vercel](https://vercel.com/) – mobiilisivun (frontendin) hostaus
+- [Puter.com](https://puter.com/) – serverless worker (API) `worker.js`
 - [TRMNL](https://trmnl.com/) – e-ink -näyttöalusta
 - [Palvelukartta / Service Map API](https://api.hel.fi/servicemap/v2/) – Helsingin seudun avoin palvelu- ja havaintodata
