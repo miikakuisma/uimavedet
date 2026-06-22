@@ -199,7 +199,11 @@
   @media (prefers-reduced-motion:reduce){.sheet,.sheet-backdrop{transition:none}}
   /* pinned header · scrolling middle · pinned footer */
   .sheet-top{position:relative;flex:none;padding:8px 18px 12px}
-  .sheet-body{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px;overscroll-behavior:contain}
+  /* min-height:0 lets this flex item shrink below its content height so
+     overflow-y:auto actually scrolls. Without it a long description grows the
+     sheet past 90vh, and since the sheet is anchored to bottom:0 the top
+     (with the ✕ close button) gets pushed off-screen and out of reach. */
+  .sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px;overscroll-behavior:contain}
   .sheet-foot{flex:none;padding:12px 18px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper-2)}
   .sheet.no-foot .sheet-foot{display:none}
   .sheet.no-foot .sheet-body{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
