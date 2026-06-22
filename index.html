@@ -172,14 +172,20 @@
     background:var(--paper-2);border:1px solid var(--line);border-bottom:0;
     border-radius:20px 20px 0 0;
     box-shadow:0 -8px 44px -14px rgba(18,46,54,.55);
-    padding:8px 18px calc(20px + env(safe-area-inset-bottom));
-    max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    display:flex;flex-direction:column;
+    max-height:90vh;
   }
   .sheet.show{transform:translate(-50%,0)}
   @media (prefers-reduced-motion:reduce){.sheet,.sheet-backdrop{transition:none}}
-  .sheet-grab{width:38px;height:4px;border-radius:99px;background:var(--line);margin:4px auto 10px}
+  /* pinned header · scrolling middle · pinned footer */
+  .sheet-top{position:relative;flex:none;padding:8px 18px 12px}
+  .sheet-body{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px;overscroll-behavior:contain}
+  .sheet-foot{flex:none;padding:12px 18px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper-2)}
+  .sheet.no-foot .sheet-foot{display:none}
+  .sheet.no-foot .sheet-body{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .sheet-grab{width:38px;height:4px;border-radius:99px;background:var(--line);margin:0 auto 10px}
   .sheet-close{
-    position:absolute;top:12px;right:12px;appearance:none;border:0;background:transparent;
+    position:absolute;top:8px;right:10px;appearance:none;border:0;background:transparent;
     font-size:19px;line-height:1;color:var(--ink-soft);cursor:pointer;
     width:36px;height:36px;border-radius:50%;display:grid;place-items:center;transition:background .15s,color .15s;
   }
@@ -198,7 +204,7 @@
   .sheet-temp .approx{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);font-family:"Hanken Grotesk",sans-serif;font-weight:600;margin-left:6px}
   .sheet-algae{--accent:var(--unknown);display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;color:var(--accent)}
   .sheet-algae .d{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
-  .sheet-desc{font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-line;margin-bottom:18px}
+  .sheet-desc{font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-line;margin-bottom:6px}
   .sheet-route{
     display:block;text-align:center;text-decoration:none;
     background:var(--sea);color:var(--paper-2);
@@ -242,16 +248,22 @@
 
 <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
 <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetName" hidden>
-  <div class="sheet-grab" aria-hidden="true"></div>
-  <button class="sheet-close" id="sheetClose" type="button" aria-label="Sulje">✕</button>
-  <header class="sheet-head">
-    <h2 class="sheet-name" id="sheetName"></h2>
-    <p class="sheet-city" id="sheetCity"></p>
-  </header>
-  <div class="sheet-map" id="sheetMap" hidden></div>
-  <div class="sheet-status" id="sheetStatus"></div>
-  <p class="sheet-desc" id="sheetDesc" hidden></p>
-  <a class="sheet-route" id="sheetRoute" target="_blank" rel="noopener" hidden>Avaa reittiopas →</a>
+  <div class="sheet-top">
+    <div class="sheet-grab" aria-hidden="true"></div>
+    <button class="sheet-close" id="sheetClose" type="button" aria-label="Sulje">✕</button>
+    <header class="sheet-head">
+      <h2 class="sheet-name" id="sheetName"></h2>
+      <p class="sheet-city" id="sheetCity"></p>
+    </header>
+  </div>
+  <div class="sheet-body" id="sheetBody">
+    <div class="sheet-map" id="sheetMap" hidden></div>
+    <div class="sheet-status" id="sheetStatus"></div>
+    <p class="sheet-desc" id="sheetDesc" hidden></p>
+  </div>
+  <div class="sheet-foot">
+    <a class="sheet-route" id="sheetRoute" target="_blank" rel="noopener">Avaa reittiopas →</a>
+  </div>
 </section>
 
 <script>
@@ -370,6 +382,7 @@ const $sheet = document.getElementById("sheet");
 const $backdrop = document.getElementById("sheetBackdrop");
 const $sheetName = document.getElementById("sheetName");
 const $sheetCity = document.getElementById("sheetCity");
+const $sheetBody = document.getElementById("sheetBody");
 const $sheetMap = document.getElementById("sheetMap");
 const $sheetStatus = document.getElementById("sheetStatus");
 const $sheetDesc = document.getElementById("sheetDesc");
@@ -411,22 +424,22 @@ function openSheet(name, card){
   $sheetDesc.textContent = b.description || "";
   $sheetDesc.hidden = !b.description;
 
-  // Kartta + reittiopas vain jos koordinaatit ovat tiedossa.
+  // Kartta + reittiopas (pinned footer) vain jos koordinaatit ovat tiedossa.
   if(b.lat != null && b.lon != null){
     $sheetMap.innerHTML = `<iframe loading="lazy" title="Kartta: ${escapeAttr(b.name)}" src="${osmEmbedURL(b)}"></iframe>`;
     $sheetMap.hidden = false;
     $sheetRoute.href = reittiopasURL(b);
-    $sheetRoute.hidden = false;
+    $sheet.classList.remove("no-foot");
   } else {
     $sheetMap.innerHTML = "";
     $sheetMap.hidden = true;
     $sheetRoute.removeAttribute("href");
-    $sheetRoute.hidden = true;
+    $sheet.classList.add("no-foot");
   }
 
   $backdrop.hidden = false;
   $sheet.hidden = false;
-  $sheet.scrollTop = 0;
+  $sheetBody.scrollTop = 0;
   requestAnimationFrame(() => { $backdrop.classList.add("show"); $sheet.classList.add("show"); });
   document.body.style.overflow = "hidden";
   $sheetClose.focus();
