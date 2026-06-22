@@ -30,9 +30,10 @@ TRMNL plugin.html ─────────┘     GET /api/beaches    (api.he
 | Tiedosto | Kuvaus |
 |---|---|
 | `worker.js` | Puter Worker -backend, API-proxy ja muunnin Palvelukartan ja näyttöjen välillä |
-| `index.html` | Mobiilioptimoitu verkkosivu (vanilla JS, ei riippuvuuksia) |
+| `index.html` | Mobiilisivun HTML-runko (Vite-projektin sisääntulo) |
+| `src/` | Mobiilisivun lähdekoodi: moduuleihin jaettu vanilla JS + `style.css` |
 | `TRMNL plugin.html` | Liquid-template, joka renderöi valitut rannat TRMNL-näytölle |
-| `docs/superpowers/specs/` | Suunnitteludokumentti |
+| `docs/superpowers/specs/` | Suunnitteludokumentit |
 
 ## Datalähde
 
@@ -105,12 +106,18 @@ ryhmän sisällä lämpimin ensin:
 3. Worker tarjoaa endpointin `GET /api/beaches`. (Esimerkki tässä projektissa:
    `https://meri.puter.work/api/beaches`.)
 
-### 2. Mobiilisivu
+### 2. Mobiilisivu (Vite)
 
-1. Avaa `index.html` ja aseta tiedoston alussa oleva `WORKER_URL` osoittamaan
-   omaan Workeriisi.
-2. Julkaise tiedosto Puterin staattisena sivustona (tai mihin tahansa staattiseen
-   hostiin). Suosikit tallentuvat selaimen `localStorage`-muistiin.
+Mobiilisivu on Vite-projekti. Aseta tarvittaessa `WORKER_URL` osoittamaan omaan
+Workeriisi tiedostossa `src/config.js`.
+
+1. Asenna riippuvuudet: `npm install`.
+2. Kehitys: `npm run dev` (Vite-dev-palvelin + HMR).
+3. Tuotantokäännös: `npm run build` → staattiset tiedostot hakemistoon `dist/`
+   (esikatselu paikallisesti: `npm run preview`).
+4. Julkaise `dist/`-hakemiston sisältö Puterin staattisena sivustona (tai mihin
+   tahansa staattiseen hostiin). Suosikit tallentuvat selaimen
+   `localStorage`-muistiin.
 
 ### 3. TRMNL Plugin
 
