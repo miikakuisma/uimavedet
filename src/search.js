@@ -5,6 +5,7 @@ import { render } from "./render.js";
 let $seg, $searchbar, $searchInput, $searchClear, $searchBtn;
 
 function openSearch(){
+  if(state.loading) return; // haku availutuu vasta kun rannat on ladattu
   $seg.hidden = true;
   $searchbar.hidden = false;
   $searchBtn.setAttribute("aria-expanded", "true");

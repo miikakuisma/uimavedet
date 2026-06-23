@@ -7,6 +7,7 @@ import { initSearch } from "./search.js";
 import { load } from "./api.js";
 
 document.getElementById("cities").addEventListener("click", e => {
+  if(state.loading) return; // suodattimet näkyvät mutta eivät toimi ennen dataa
   const btn = e.target.closest("button"); if(!btn) return;
   if(!btn.dataset.city) return; // ohita hakupainike (ei data-city:tä)
   state.city = btn.dataset.city;
@@ -15,6 +16,7 @@ document.getElementById("cities").addEventListener("click", e => {
 });
 
 document.getElementById("hideAlgae").addEventListener("change", e => {
+  if(state.loading){ e.target.checked = state.hideAlgae; return; } // pidä kytkin synkassa
   state.hideAlgae = e.target.checked; render();
 });
 

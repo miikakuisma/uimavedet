@@ -619,6 +619,28 @@
     animation: sh 1.3s infinite
   }
 
+  /* haamulämpötila: lohko oikeaan reunaan (.bdata on text-align:right) */
+  .skeleton .sk-temp {
+    display: inline-block;
+    width: 52px;
+    height: 30px;
+    border-radius: 9px
+  }
+
+  /* latausnäkymän tähdet eivät ole klikattavia; värit kuten valmiissa listassa */
+  .skfav .fav,
+  .skghost .fav {
+    cursor: default
+  }
+
+  .skfav .fav {
+    color: var(--little)
+  }
+
+  .skghost .fav {
+    color: var(--line)
+  }
+
   @keyframes sh {
     to {
       background-position: -200% 0
