@@ -32,11 +32,6 @@
   body {
     font-family: "Hanken Grotesk", system-ui, sans-serif;
     color: var(--ink);
-    /* only the teal glow sits on the body, over the paper canvas above */
-    background-color: transparent;
-    background-image:
-      radial-gradient(120% 80% at 50% -10%, rgba(19, 112, 127, .10), rgba(19, 112, 127, 0) 60%);
-    background-repeat: no-repeat;
     line-height: 1.4;
     min-height: 100vh;
     padding: env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
@@ -151,16 +146,8 @@
      textured page. Once stuck it gets a solid fill (cards clip crisply under
      it) plus a soft shadow for separation. */
   .controls.stuck {
-    background: transparent !important;
+    background: var(--paper) !important;
     box-shadow: 0 7px 14px -9px rgba(18, 46, 54, .5);
-    backdrop-filter: blur(10px);
-  }
-
-  @supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
-    .controls.stuck {
-      background: var(--paper);
-      box-shadow: 0 7px 14px -9px rgba(18, 46, 54, .5);
-    }
   }
 
   .seg {
@@ -717,10 +704,9 @@
     transform: translate(-50%, 110%);
     transition: transform .32s cubic-bezier(.2, .7, .2, 1);
     background: var(--paper-2);
-    border: 1px solid var(--line);
+    border: 1px solid var(--ink-soft);
     border-bottom: 0;
     border-radius: 20px 20px 0 0;
-    box-shadow: 0 -8px 44px -14px rgba(18, 46, 54, .55);
     display: flex;
     flex-direction: column;
     max-height: 90vh;
@@ -901,7 +887,7 @@
     display: block;
     text-align: center;
     text-decoration: none;
-    background: var(--sea);
+    background: #007ac9;
     color: var(--paper-2);
     font-family: inherit;
     font-weight: 700;
