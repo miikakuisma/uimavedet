@@ -1,0 +1,19 @@
+{
+  "name": "Uimavedet · Helsingin seutu",
+  "short_name": "Uimavedet",
+  "description": "Helsingin seudun uimavesien tilanne yhdellä silmäyksellä.",
+  "lang": "fi",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#F1E8D6",
+  "theme_color": "#122E36",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#122E36">
 <title>Uimavedet · Helsingin seutu</title>
+<link rel="icon" type="image/png" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/icon-512.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,9 +15,12 @@
 <body>
 <div class="wrap">
   <header class="masthead">
-    <p class="kicker">Helsingin seutu</p>
-    <h1>Uimavedet</h1>
-    <p class="updated" id="updated">&nbsp;</p>
+    <div class="masthead-brand">
+      <img class="masthead-logo" src="/icon-512.png" alt="" width="52" height="52">
+      <div class="masthead-text">
+        <h1>Uimavedet</h1>
+      </div>
+    </div>
   </header>
 </div>
 
@@ -47,7 +53,7 @@
     </label>
   </div>
   <main id="list" aria-live="polite"></main>
-
+  <p class="updated" id="updated">&nbsp;</p>
   <footer id="footer" hidden>
     Lähde: <a href="https://api.hel.fi/servicemap/v2/" target="_blank" rel="noopener">Helsingin kaupungin Palvelukartta</a> ·
     havainnot uimarantakaudelta. Tarkista aina tilanne paikan päältä ennen uintia.

@@ -43,24 +43,31 @@
 
   /* ---------- Masthead ---------- */
   header.masthead {
-    padding: 38px 2px 0;
+    padding: 20px 2px 0;
     text-align: left
   }
 
-  .kicker {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .34em;
-    text-transform: uppercase;
-    color: var(--sea);
-    margin-bottom: 6px;
+  .masthead-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .masthead-logo {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
   }
 
   .masthead h1 {
     font-family: "Fraunces", serif;
     font-optical-sizing: auto;
     font-weight: 900;
-    font-size: clamp(44px, 15vw, 72px);
+    font-size: clamp(34px, 11vw, 50px);
     line-height: .92;
     letter-spacing: -.02em;
     font-variation-settings: "SOFT" 0, "WONK" 1;
@@ -80,7 +87,8 @@
     color: var(--ink-soft);
     font-weight: 500;
     letter-spacing: .01em;
-    margin-top: 16px
+    margin-top: 12px;
+    text-align: center;
   }
 
   .updated .dot-live {
@@ -116,7 +124,7 @@
     z-index: 20;
     /* full-bleed: negative margins cancel the body's 18px side padding so the
        bar spans the viewport edge-to-edge (no gutter seam on wide screens) */
-    margin: 22px -18px 0;
+    margin: 10px -18px 0;
     padding: 12px 0 12px;
     background: transparent;
     transition: background .2s, box-shadow .2s;
@@ -675,7 +683,7 @@
     z-index: 50;
     width: 100%;
     max-width: var(--maxw);
-    transform: translate(-50%, 100%);
+    transform: translate(-50%, 110%);
     transition: transform .32s cubic-bezier(.2, .7, .2, 1);
     background: var(--paper-2);
     border: 1px solid var(--line);
