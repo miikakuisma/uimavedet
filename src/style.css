@@ -19,20 +19,27 @@
     padding: 0
   }
 
+  /* The paper colour + texture live on <html> so they paint the whole canvas —
+     the overscroll/rubber-band areas, the iOS safe areas (behind the status bar),
+     and anything below where <body> ends — leaving no white seams. */
   html {
-    -webkit-text-size-adjust: 100%
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--paper);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
   }
 
   body {
     font-family: "Hanken Grotesk", system-ui, sans-serif;
     color: var(--ink);
-    background-color: var(--paper);
+    /* only the teal glow sits on the body, over the paper canvas above */
+    background-color: transparent;
     background-image:
-      radial-gradient(120% 80% at 50% -10%, rgba(19, 112, 127, .10), transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+      radial-gradient(120% 80% at 50% -10%, rgba(19, 112, 127, .10), rgba(19, 112, 127, 0) 60%);
+    background-repeat: no-repeat;
     line-height: 1.4;
     min-height: 100vh;
-    padding: 0 18px env(safe-area-inset-bottom);
+    padding: env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
     -webkit-font-smoothing: antialiased;
   }
 
@@ -120,7 +127,9 @@
   /* ---------- Controls ---------- */
   .controls {
     position: sticky;
-    top: 0;
+    /* pin below the iOS status bar (0 on devices without a notch) so the clock
+       never overlaps the filter buttons once the bar sticks */
+    top: env(safe-area-inset-top);
     z-index: 20;
     /* full-bleed: negative margins cancel the body's 18px side padding so the
        bar spans the viewport edge-to-edge (no gutter seam on wide screens) */
