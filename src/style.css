@@ -150,6 +150,20 @@
     box-shadow: 0 7px 14px -9px rgba(18, 46, 54, .5);
   }
 
+  /* env(safe-area-inset-top) pins the bar's box below the status bar, but the
+     strip behind the translucent clock (0 → inset) stays transparent, so scrolled
+     cards bleed up under the clock. This fills that strip with the same paper so
+     the clock always sits on a solid bar. Full-bleed via the bar's -18px margins. */
+  .controls.stuck::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: env(safe-area-inset-top);
+    background: var(--paper);
+  }
+
   .seg {
     display: flex;
     gap: 4px;
