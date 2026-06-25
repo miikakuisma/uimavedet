@@ -5,6 +5,7 @@ import { render, onScroll } from "./render.js";
 import { initSheet } from "./sheet.js";
 import { initSearch } from "./search.js";
 import { load } from "./api.js";
+import { inject } from "@vercel/analytics"
 
 document.getElementById("cities").addEventListener("click", e => {
   if(state.loading) return; // suodattimet näkyvät mutta eivät toimi ennen dataa
@@ -22,6 +23,7 @@ document.getElementById("hideAlgae").addEventListener("change", e => {
 
 window.addEventListener("scroll", onScroll, {passive:true});
 
+inject()
 initSheet();
 initSearch();
 load();
